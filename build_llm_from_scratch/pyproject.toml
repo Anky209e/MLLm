@@ -1,0 +1,13 @@
+[project]
+name = "build-llm-from-scratch"
+version = "0.1.0"
+description = "Learning to build LLM from scratch.It contains all basic codes."
+readme = "README.md"
+requires-python = "==3.12.12"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "plotly>=6.4.0",
+    "tensorflow>=2.20.0",
+    "torch>=2.9.0",
+    "torchvision>=0.24.0",
+]
