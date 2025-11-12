@@ -13,27 +13,41 @@ inputs = torch.tensor(
 )
 
 
-# Corresponding words
+def softmax_basic(x):
+    """Basic softmax function"""
+    return torch.exp(x) / torch.exp(x).sum(dim=0)
+
+
 words = ["Your", "journey", "starts", "with", "one", "step"]
+query = inputs[1]  # query is word journey
 
-# Extract x, y, z coordinates
-x_coords = inputs[:, 0].numpy()
-y_coords = inputs[:, 1].numpy()
-z_coords = inputs[:, 2].numpy()
+attention_score = torch.empty(inputs.shape[0])
+print(attention_score)
+"""
+attention_score:
+[ 2.3257e-38,  4.5642e-41, -6.3288e+12,  4.5640e-41,  2.3010e-38,4.5642e-41]
+"""
+for i, x_i in enumerate(inputs):
+    print(f"------{words[i]}------")
+    print(f"attention_score_{i} = x_{i}  {x_i} . query  {query}")
+    attention_score[i] = torch.dot(x_i, query)
+    print(
+        f"attention_score_{i} = {attention_score[i]}"
+    )  # dot product between each input embedding vector and query vector
+print(f"final_attention_score = {attention_score}")
 
-# Create 3D plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
+print(f"Basic_softmax_score: {softmax_basic(attention_score)}")
+print(f"Basic_softmax_sum: {softmax_basic(attention_score).sum()}")
 
-# Plot each point and annotate with corresponding word
-for x, y, z, word in zip(x_coords, y_coords, z_coords, words):
-    ax.scatter(x, y, z)
-    ax.text(x, y, z, word, fontsize=10)
+attention_weights = torch.softmax(attention_score, dim=0)
+print(f"Torch Softmax:{attention_weights}")
 
-# Set labels for axes
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-ax.set_zlabel("Z")
+attention_scores = inputs @ inputs.T
 
-plt.title("3D Plot of Word Embeddings")
-plt.show()
+
+attention_weights = torch.softmax(attention_scores, dim=-1)
+print(attention_weights)
+
+context_vectors = attention_weights @ inputs
+
+print(context_vectors)
