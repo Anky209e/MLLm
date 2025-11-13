@@ -38,3 +38,5 @@
   - Dividing the attention Scores by root of embedding Dimension before putting them in softmax helps with:
     - Reduces the peaks of softmax and model won't be very overconfident:
     - Reduces Variance if we divide by the root of Dimension.
+  - Finally we will calculate context vectors which is dot product of Attention_weights and Values
+  
