@@ -2,17 +2,17 @@ import torch
 import torch.nn as nn
 
 
-class SelfAttention_v1(nn.Module):
-    def __init__(self, dim_in, dim_out):
+class SelfAttention(nn.Module):
+    def __init__(self, dim_in, dim_out, qkv_bias=False):
         super().__init__()
-        self.W_query = nn.Parameter(torch.rand(dim_in, dim_out))
-        self.W_key = nn.Parameter(torch.rand(dim_in, dim_out))
-        self.W_value = nn.Parameter(torch.rand(dim_in, dim_out))
+        self.W_query = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.W_key = nn.Linear(dim_in, dim_out, bias=qkv_bias)
+        self.W_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
 
     def forward(self, x):
-        keys = x @ self.W_key
-        queries = x @ self.W_query
-        values = x @ self.W_value
+        queries = self.W_query(x)
+        keys = self.W_key(x)
+        values = self.W_value(x)
 
         attention_scores = queries @ keys.T
         # Scaling by root of embedding dimension of key to reduce variance
@@ -39,6 +39,6 @@ if __name__ == "__main__":
     dim_in = inputs.shape[1]
     dim_out = 2
 
-    s_attn = SelfAttention_v1(dim_in=dim_in, dim_out=dim_out)
+    s_attn = SelfAttention(dim_in=dim_in, dim_out=dim_out)
 
     print(s_attn(inputs))
