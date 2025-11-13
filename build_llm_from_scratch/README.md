@@ -19,3 +19,22 @@
   - Dot product quantifies how much aligned are two vectors in the space.
   - Dot product determines the extent to which elements of input attend to each other or values to each other.
   - Higher the dot product -> Higher similarity and higher attention scores.
+
+- Self Attention
+  - For self attention we want trainable weights that we can update and improve attention.
+  - We have Three different weight matrix
+    - W_q = Query
+    - W_k = Key
+    - W_v = Value
+  - Input Dimension of these matrices need to be same as Embedding Dimension of out Input vectors.
+  - Now for calculating:
+    - Keys = Input . W_k
+    - Queries = Input . W_q
+    - Values = Input . W_v
+  - Now we need to calculate Attention score:
+    - attention_score = Queries . Transpose(Keys)
+  - For calculating Attention weights We will have to scale these values and use softmax.
+  - Before using Softmax We will scale then by root(key.shape[-1]) .
+  - Dividing the attention Scores by root of embedding Dimension before putting them in softmax helps with:
+    - Reduces the peaks of softmax and model won't be very overconfident:
+    - Reduces Variance if we divide by the root of Dimension.
