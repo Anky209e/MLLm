@@ -39,4 +39,16 @@
     - Reduces the peaks of softmax and model won't be very overconfident:
     - Reduces Variance if we divide by the root of Dimension.
   - Finally we will calculate context vectors which is dot product of Attention_weights and Values
+
+- Causal Attention
+  - For Causal Attention we Mask the Values which we do not need or deemed to be not required.
+  - We create a mask and replace values above diagonal with -inf.
+  - Why -inf ?
+    - We want to make sure that during softmax the other values are not effected by removed or extra values.
+    - Prevents Data leakage
+
+- Multi-Head Attention
+  - We have multiple heads (n) of Causal Attention.
+  - We will have (n) no of Q,K,V and we will process them parallel.
+  - In the end we will have n no. of context vectors which we will concatenate and that will be our final context vector for input.
   
