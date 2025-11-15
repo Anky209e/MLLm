@@ -3,26 +3,35 @@ import torch.nn as nn
 
 
 class CausalAttention(nn.Module):
-    def __init__(self, dim_in, dim_out, qkv_bias=False):
+    def __init__(self, dim_in, dim_out, context_length, dropout=0.2, qkv_bias=False):
         super().__init__()
+
         self.W_query = nn.Linear(dim_in, dim_out, bias=qkv_bias)
         self.W_key = nn.Linear(dim_in, dim_out, bias=qkv_bias)
         self.W_value = nn.Linear(dim_in, dim_out, bias=qkv_bias)
-
-    def forward(self, x):
-        queries = self.W_query(x)
-        keys = self.W_key(x)
-        values = self.W_value(x)
-
-        attention_score = queries @ keys.T
-        context_length = attention_score.shape[-1]
-        # using -inf to avoide data leakage during softmax
-        mask = torch.triu(torch.ones(context_length, context_length), diagonal=1)
-        masked_attention_scores = attention_score.masked_fill(mask.bool(), -torch.inf)
-        attention_weights = torch.softmax(
-            masked_attention_scores / masked_attention_scores.shape[-1] ** 0.5, dim=-1
+        self.dropout = nn.Dropout(dropout)
+        # Buffer for model state
+        self.register_buffer(
+            "mask", torch.triu(torch.ones(context_length, context_length), diagonal=1)
         )
 
+    def forward(self, x):
+        batch_size, num_tokens, input_dim = x.shape
+        keys = self.W_key(x)
+        queries = self.W_query(x)
+        values = self.W_value(x)
+
+        attention_scores = queries @ keys.transpose(1, 2)
+
+        attention_scores.masked_fill_(
+            self.mask.bool()[:num_tokens, :num_tokens], -torch.inf
+        )
+
+        attention_weights = torch.softmax(
+            attention_scores / keys.shape[-1] ** 0.5, dim=-1
+        )
+
+        attention_weights = self.dropout(attention_weights)
         context_vectors = attention_weights @ values
         return context_vectors
 
@@ -38,7 +47,15 @@ if __name__ == "__main__":
             [0.05, 0.80, 0.55],  # step
         ]
     )
+    batch = torch.stack((inputs, inputs), dim=0)
+    print(batch.shape)
+
+    context_length = batch.shape[1]
     dim_in = inputs.shape[1]
-    dim_out = 2
-    att_c = CausalAttention(dim_in, dim_out)
-    print(att_c(inputs))
+    dim_out = 3
+
+    attentionCausal = CausalAttention(
+        dim_in=dim_in, dim_out=dim_out, context_length=context_length, dropout=0.0
+    )
+    context_vectors = attentionCausal(batch)
+    print(context_vectors)
