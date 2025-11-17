@@ -48,7 +48,13 @@
     - Prevents Data leakage
 
 - Multi-Head Attention
-  - We have multiple heads (n) of Causal Attention.
+  - We have multiple 2heads (n) of Causal Attention.
   - We will have (n) no of Q,K,V and we will process them parallel.
   - In the end we will have n no. of context vectors which we will concatenate and that will be our final context vector for input.
-  
+
+- Layer Normalisation
+  - While Doing backprop on out network The gradients and become too small or large.
+  - Its called as vanishing and exploding gradients which can result in unstable training dynamics.
+  - Layer Normalisation prevents this.
+  - As training Proceeds Input to each layer can change i.e internal covariate shift.
+  - This delays convergence and layer Normalisation prevents this.
