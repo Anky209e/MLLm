@@ -58,3 +58,8 @@
   - Layer Normalisation prevents this.
   - As training Proceeds Input to each layer can change i.e internal covariate shift.
   - This delays convergence and layer Normalisation prevents this.
+
+- Transformer Block
+  - ![Transformer Image](https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1-768x1082.png)
+
+```
