@@ -3,10 +3,10 @@ from gelu import GELU
 
 
 class FeedForwardNeuralNetwork(nn.Module):
-    def __init__(self, embedding_size, *args, **kwargs) -> None:
+    def __init__(self, embedding_dim, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.layer1 = nn.Linear(embedding_size, 4 * embedding_size)
-        self.layer2 = nn.Linear(4 * embedding_size, embedding_size)
+        self.layer1 = nn.Linear(embedding_dim, 4 * embedding_dim)
+        self.layer2 = nn.Linear(4 * embedding_dim, embedding_dim)
         self.gelu = GELU()
 
     def forward(self, x):

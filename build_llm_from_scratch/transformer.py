@@ -19,12 +19,12 @@ class Transformer(nn.Module):
         )
 
         self.feed_forward_network = FeedForwardNeuralNetwork(
-            embedding_size=cfg["embedding_size"]
+            embedding_dim=cfg["embedding_dim"]
         )
 
         self.gelu = GELU()
-        self.layer_norm1 = LayerNorm(embedding_dim=cfg["embedding_size"])
-        self.layer_norm2 = LayerNorm(embedding_dim=cfg["embedding_size"])
+        self.layer_norm1 = LayerNorm(embedding_dim=cfg["embedding_dim"])
+        self.layer_norm2 = LayerNorm(embedding_dim=cfg["embedding_dim"])
 
         self.dropout = nn.Dropout(cfg["dropout"])
 
