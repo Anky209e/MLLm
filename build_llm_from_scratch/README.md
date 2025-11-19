@@ -59,6 +59,11 @@
   - As training Proceeds Input to each layer can change i.e internal covariate shift.
   - This delays convergence and layer Normalisation prevents this.
 
+- GELU
+  - Gaussian Error linear Unit
+  - Instead of ReLU we use GELU in transoformers as it retains some values that are negative.
+  - GELU is also used in GPT models.
+
 - Transformer Block
   - ![Transformer Image](https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1-768x1082.png)
 
