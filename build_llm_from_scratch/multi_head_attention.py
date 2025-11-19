@@ -22,6 +22,8 @@ class MultiHeadAttention(nn.Module):
             "mask", torch.triu(torch.ones(context_length, context_length), diagonal=1)
         )
 
+        self.output_projection = nn.Linear(dim_out, dim_out)
+
     def forward(self, x):
         batch_size, num_tokens, dim_in = x.shape
 
@@ -62,4 +64,5 @@ class MultiHeadAttention(nn.Module):
             batch_size, num_tokens, self.dim_out
         )
 
+        context_vectors = self.output_projection(context_vectors)
         return context_vectors
