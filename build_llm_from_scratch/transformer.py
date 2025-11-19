@@ -1,8 +1,9 @@
 import torch.nn as nn
-from multi_head_attention import MultiHeadAttention
+
 from feed_forward_network import FeedForwardNeuralNetwork
 from gelu import GELU
 from layer_normalisation import LayerNorm
+from multi_head_attention import MultiHeadAttention
 
 
 class Transformer(nn.Module):
@@ -10,11 +11,11 @@ class Transformer(nn.Module):
         super().__init__(*args, **kwargs)
 
         self.multi_head_attention = MultiHeadAttention(
-            dim_in=cfg["dim_in"],
-            dim_out=cfg["dim_out"],
+            dim_in=cfg["embedding_dim"],
+            dim_out=cfg["embedding_dim"],
             context_length=cfg["context_length"],
-            dropout=cfg["dropout"],
-            num_heads=cfg["num_heads"],
+            dropout=cfg["drop_rate"],
+            num_heads=cfg["n_heads"],
             qkv_bias=cfg["qkv_bias"],
         )
 
@@ -26,7 +27,7 @@ class Transformer(nn.Module):
         self.layer_norm1 = LayerNorm(embedding_dim=cfg["embedding_dim"])
         self.layer_norm2 = LayerNorm(embedding_dim=cfg["embedding_dim"])
 
-        self.dropout = nn.Dropout(cfg["dropout"])
+        self.dropout = nn.Dropout(cfg["drop_rate"])
 
     def forward(self, x):
         residual = x
