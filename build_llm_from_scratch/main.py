@@ -2,6 +2,7 @@ import tiktoken
 import torch
 
 from gpt import GPTModel
+from utils import generate_text_simple, get_model_details
 
 if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")
@@ -23,13 +24,12 @@ if __name__ == "__main__":
     }
 
     model = GPTModel(cfg=GPT_CONFIG_124M)
-    for i, j in model.named_parameters():
-        print(i, j.numel())
-    params = sum(p.numel() for p in model.parameters())
+    params, total_size = get_model_details(model)
     print(f"Total number of Parameters:{params:,}")
-    total_bytes = params * 4
-    total_size = total_bytes / (1024 * 1024)
     print(f"Total Size of Model:{total_size:.2f}MB")
     # out = model(batch)
+    model.eval()
+    idx = generate_text_simple(model, batch, 6, GPT_CONFIG_124M["context_length"])
+    print(idx)
     # print(out.shape)
     # print(out)
