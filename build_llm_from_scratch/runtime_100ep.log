@@ -98,3 +98,8 @@
 2025-11-20 21:04:09,640 - INFO - Epoch:98 (Step:019305) Train Loss:0.023,Val Loss:10.371,Tokens Seen:29603840, Train Preplex:1
 2025-11-20 21:05:31,943 - INFO - Epoch:99 (Step:019502) Train Loss:0.021,Val Loss:10.386,Tokens Seen:29905920, Train Preplex:1
 2025-11-20 21:06:54,243 - INFO - Epoch:100 (Step:019699) Train Loss:0.028,Val Loss:10.337,Tokens Seen:30208000, Train Preplex:1
+2025-11-21 12:11:23,697 - INFO - Epoch:1 (Step:000294) Train Loss:5.871,Val Loss:6.094,Tokens Seen:302080, Train Preplex:355
+2025-11-21 12:15:08,577 - INFO - Epoch:1 (Step:000294) Train Loss:5.880,Val Loss:6.283,Tokens Seen:302080, Train Preplex:358
+2025-11-21 12:16:57,453 - INFO - Epoch:2 (Step:000589) Train Loss:5.426,Val Loss:6.075,Tokens Seen:604160, Train Preplex:227
+2025-11-21 12:50:00,219 - INFO - Epoch:1 (Step:000294) Train Loss:5.744,Val Loss:6.329,Tokens Seen:302080, Train Preplex:312
+2025-11-21 12:51:24,747 - INFO - Epoch:2 (Step:000589) Train Loss:5.317,Val Loss:5.736,Tokens Seen:604160, Train Preplex:204
