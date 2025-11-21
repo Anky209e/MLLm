@@ -1,27 +1,24 @@
 import tiktoken
 import torch
-import os
+from torch.utils.tensorboard import SummaryWriter
 
 from gpt import GPTModel
 from utils import (
-    generate_text_simple,
     get_model_details,
-    calc_loss_loader,
-    calc_loss_batch,
-    train_model_simple,
     plot_losses,
+    train_model_simple,
 )
-from verdict_dataloader import VerdictDatasetV1, create_dataloader_v1
+from verdict_dataloader import create_dataloader_v1
 
 FILE_PATH = "data.txt"
 FILE2 = "moby_dik.txt"
 
 TRAIN_RATIO = 0.90
-BATCH_SIZE = 6
+BATCH_SIZE = 4
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device:{DEVICE}")
 start_context = "So close behind some promontory "
-
+writer = SummaryWriter("runs/gpt163m")
 GPT_CONFIG_124M = {
     "vocab_size": 50257,  # Vocabulary size
     "context_length": 256,  # Shortened context length (orig: 1024)
@@ -55,7 +52,7 @@ train_loader = create_dataloader_v1(
     max_length=GPT_CONFIG_124M["context_length"],
     stride=GPT_CONFIG_124M["context_length"],
     drop_last=False,
-    shuffle=False,
+    shuffle=True,
     num_workers=0,
 )
 
@@ -65,7 +62,7 @@ val_loader = create_dataloader_v1(
     max_length=GPT_CONFIG_124M["context_length"],
     stride=GPT_CONFIG_124M["context_length"],
     drop_last=False,
-    shuffle=False,
+    shuffle=True,
     num_workers=0,
 )
 
@@ -90,8 +87,7 @@ params, size = get_model_details(model)
 print(f"Total Params:{params:,}")
 print(f"Total Size:{size:.2f}MB")
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-num_epochs = 100
-
+num_epochs = 2
 train_losses, val_losses, tokens_seen = train_model_simple(
     model=model,
     train_loader=train_loader,
@@ -103,6 +99,8 @@ train_losses, val_losses, tokens_seen = train_model_simple(
     start_context=start_context,
     tokenizer=tokenizer,
     device=DEVICE,
+    cfg=GPT_CONFIG_124M,
+    writer=writer,
 )
 
 epochs_tensor = torch.linspace(0, num_epochs, len(train_losses))
