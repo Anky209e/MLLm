@@ -84,7 +84,7 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     return train_loss, val_loss
 
 
-def generate_and_print_sample(model, tokenizer, device, start_context):
+def generate_and_print_sample(model, tokenizer, device, start_context, set_train=True):
     model.eval()
     context_size = model.position_embeddings.weight.shape[0]
     encoded = text_to_token_ids(start_context, tokenizer).to(device)
@@ -94,7 +94,8 @@ def generate_and_print_sample(model, tokenizer, device, start_context):
         )
     decoded_text = token_ids_to_text(token_ids, tokenizer)
     print(decoded_text.replace("\n", " "))  # Compact print format
-    model.train()
+    if set_train:
+        model.train()
 
 
 def plot_losses(epochs_seen, tokens_seen, train_losses, val_losses):
