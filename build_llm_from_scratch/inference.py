@@ -5,7 +5,7 @@ from utils import text_to_token_ids, token_ids_to_text, generate
 
 
 if __name__ == "__main__":
-    WEIGHT_PATH = "weights_100ep.pth"
+    WEIGHT_PATH = "weights_checkpoint_5ep.pth"
     GPT_CONFIG_124M = {
         "vocab_size": 50257,  # Vocabulary size
         "context_length": 256,  # Shortened context length (orig: 1024)
@@ -19,9 +19,10 @@ if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    start_context = (
-        "It was not till three years later that, in the course of a few weeks'"
-    )
+    start_context = """ I had seen little of Holmes lately. My marriage had drifted us away
+from each other. My own complete happiness, and the home-centred
+interests which rise up around the man who first finds himself master
+of his own establishment,"""
 
     model = GPTModel(GPT_CONFIG_124M)
     model.load_state_dict(torch.load(WEIGHT_PATH, map_location=device))
@@ -30,7 +31,7 @@ if __name__ == "__main__":
     token_ids = generate(
         model=model,
         idx=text_to_token_ids(start_context, tokenizer, device),
-        max_new_tokens=50,
+        max_new_tokens=150,
         context_size=GPT_CONFIG_124M["context_length"],
         top_k=50,
         temperature=1,
