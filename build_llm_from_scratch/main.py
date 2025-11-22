@@ -1,6 +1,7 @@
 import tiktoken
 import torch
 from torch.utils.tensorboard import SummaryWriter
+import os
 
 from gpt import GPTModel
 from utils import (
@@ -10,11 +11,35 @@ from utils import (
 )
 from verdict_dataloader import create_dataloader_v1
 
-FILE_PATH = "data.txt"
-FILE2 = "moby_dik.txt"
+# 1. Configuration
+folder_path = "Gutenberg_Top_100"
+separator = " <|endoftext|> "
+usable = 96
+
+# 2. Load all files
+print("Reading files...")
+file_contents = []
+
+# Sorting ensures the order is the same every time
+files = sorted([f for f in os.listdir(folder_path) if f.endswith(".txt")])
+files = files[:usable]
+print(f"Files Loaded:{len(files)}")
+for filename in files:
+    file_path = os.path.join(folder_path, filename)
+    try:
+        # errors='ignore' or 'replace' helps if there are rogue non-utf-8 bytes
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read().strip()
+            if content:  # Only add non-empty files
+                file_contents.append(content)
+    except Exception as e:
+        print(f"Skipping {filename}: {e}")
+
+# 3. Concatenate into a single string
+txt = separator.join(file_contents)
 
 TRAIN_RATIO = 0.90
-BATCH_SIZE = 4
+BATCH_SIZE = 6
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Device:{DEVICE}")
 start_context = "So close behind some promontory "
@@ -28,19 +53,15 @@ GPT_CONFIG_124M = {
     "drop_rate": 0.15,  # Dropout rate
     "qkv_bias": False,  # Query-key-value bias
 }
-
-with open(FILE_PATH, "r", encoding="utf-8") as f:
-    txt1 = f.read()
-with open(FILE2, "r", encoding="utf-8") as f:
-    txt2 = f.read()
-txt = txt1 + " <|endoftext|> " + txt2
+CHECKPOINT = "weights_checkpoint_5ep.pth"
+train_from_checkpoint = True
 tokenizer = tiktoken.get_encoding("gpt2")
 
 total_characters = len(txt)
 total_tokens = len(tokenizer.encode(txt, allowed_special={"<|endoftext|>"}))
 
-print("Characters:", total_characters)
-print("Tokens:", total_tokens)
+print(f"Characters:{total_characters:,}")
+print(f"Tokens:{total_tokens:,}")
 
 split_idx = int(TRAIN_RATIO * len(txt))
 train_data = txt[:split_idx]
@@ -82,12 +103,15 @@ if total_tokens * (1 - TRAIN_RATIO) < GPT_CONFIG_124M["context_length"]:
     )
 
 model = GPTModel(GPT_CONFIG_124M)
+if train_from_checkpoint:
+    print("Loading Checkpoint...")
+    model.load_state_dict(torch.load(CHECKPOINT))
 model.to(device=DEVICE)
 params, size = get_model_details(model)
 print(f"Total Params:{params:,}")
 print(f"Total Size:{size:.2f}MB")
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-num_epochs = 2
+num_epochs = 5
 train_losses, val_losses, tokens_seen = train_model_simple(
     model=model,
     train_loader=train_loader,
