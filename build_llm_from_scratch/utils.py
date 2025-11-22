@@ -241,9 +241,9 @@ def train_model_simple(
             temperature=1,
         )
 
-        torch.save(model.state_dict(), f"weights_{epoch}.pth")
+        torch.save(model.state_dict(), f"weights_{epoch + 1}.pth")
         generated_text = token_ids_to_text(token_ids, tokenizer)
 
         print(generated_text)
-    torch.save(model.state_dict(), f"weights_{num_epochs}_256_768.pth")
+    torch.save(model.state_dict(), "weights_checkpoint.pth")
     return train_losses, val_losses, track_tokens_seen
