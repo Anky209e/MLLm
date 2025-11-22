@@ -241,6 +241,7 @@ def train_model_simple(
             temperature=1,
         )
 
+        torch.save(model.state_dict(), f"weights_{epoch}.pth")
         generated_text = token_ids_to_text(token_ids, tokenizer)
 
         print(generated_text)
