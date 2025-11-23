@@ -53,7 +53,7 @@ GPT_CONFIG_124M = {
     "drop_rate": 0.15,  # Dropout rate
     "qkv_bias": False,  # Query-key-value bias
 }
-CHECKPOINT = "weights_checkpoint_5ep.pth"
+CHECKPOINT = "weights_checkpoint.pth"
 train_from_checkpoint = True
 tokenizer = tiktoken.get_encoding("gpt2")
 
@@ -111,7 +111,7 @@ params, size = get_model_details(model)
 print(f"Total Params:{params:,}")
 print(f"Total Size:{size:.2f}MB")
 optimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)
-num_epochs = 5
+num_epochs = 6
 train_losses, val_losses, tokens_seen = train_model_simple(
     model=model,
     train_loader=train_loader,
