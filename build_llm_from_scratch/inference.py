@@ -5,7 +5,7 @@ from utils import text_to_token_ids, token_ids_to_text, generate
 
 
 if __name__ == "__main__":
-    WEIGHT_PATH = "weights_checkpoint_5ep.pth"
+    WEIGHT_PATH = "weights_checkpoint.pth"
     GPT_CONFIG_124M = {
         "vocab_size": 50257,  # Vocabulary size
         "context_length": 256,  # Shortened context length (orig: 1024)
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     start_context = """ I had seen little of Holmes lately. My marriage had drifted us away
 from each other. My own complete happiness, and the home-centred
 interests which rise up around the man who first finds himself master
-of his own establishment,"""
+of his own establishment """
 
     model = GPTModel(GPT_CONFIG_124M)
     model.load_state_dict(torch.load(WEIGHT_PATH, map_location=device))
