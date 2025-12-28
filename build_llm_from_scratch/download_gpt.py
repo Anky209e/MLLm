@@ -43,7 +43,7 @@ def download_file(url, destination):
 
 
 def load_gpt2_params_from_tf_ckpt(ckpt_path, settings):
-    params = {"blocks": [{} for _ in range(settings["n_layers"])]}
+    params = {"blocks": [{} for _ in range(settings["n_layer"])]}
 
     # iterating over each variable in checkpoint
     for name, _ in tf.train.list_variables(ckpt_path):
