@@ -87,7 +87,7 @@ def load_weights_into_gpt(gpt_model, params):
             b
         ].multi_head_attention.output_projection.bias = assign(
             gpt_model.transformer_blocks[b].multi_head_attention.output_projection.bias,
-            params["blocks"][b]["attn"]["c_proj"]["b"].T,
+            params["blocks"][b]["attn"]["c_proj"]["b"],
         )
         # Loading Weights and bias for Feed Forward network
         gpt_model.transformer_blocks[b].feed_forward_network.layers[0].weight = assign(
@@ -140,11 +140,11 @@ gpt_model.to(device=device)
 
 token_ids = generate(
     model=gpt_model,
-    idx=text_to_token_ids("What are you ?", tokenizer, device=device),
+    idx=text_to_token_ids("The sun shines in the ", tokenizer, device=device),
     max_new_tokens=25,
     context_size=GPT_CONFIG_124M["context_length"],
     top_k=50,
-    temperature=1.2,
+    temperature=1.3,
 )
 
 print("Output text:\n", token_ids_to_text(token_ids, tokenizer))
