@@ -15,7 +15,7 @@ class GPTModel(nn.Module):
         self.dropout_embeddings = nn.Dropout(cfg["drop_rate"])
 
         # transformer blocks
-        self.tranformer_blocks = nn.Sequential(
+        self.transformer_blocks = nn.Sequential(
             *[Transformer(cfg) for _ in range(cfg["n_layers"])]
         )
 
@@ -37,7 +37,7 @@ class GPTModel(nn.Module):
         # adding position_embeddings to token_embeddings
         x = position_embeddings + token_embeddings
         x = self.dropout_embeddings(x)
-        x = self.tranformer_blocks(x)
+        x = self.transformer_blocks(x)
         x = self.layer_norm(x)
         logits = self.output_layer(x)
         return logits
