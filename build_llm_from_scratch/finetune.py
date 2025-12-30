@@ -1,12 +1,12 @@
 # TODO: add finetune functions
 
+import numpy as np
+import tiktoken
 import torch
+
 from download_gpt import download_and_load_gpt2
 from gpt import GPTModel
-import numpy as np
-from utils import text_to_token_ids, token_ids_to_text, generate
-import tiktoken
-import gpt
+from utils import generate, text_to_token_ids, token_ids_to_text
 
 GPT_CONFIG_124M = {
     "vocab_size": 50257,  # Vocabulary size
