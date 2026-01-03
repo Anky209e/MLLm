@@ -1,3 +1,4 @@
 sms_data/*
 sms_data.zip
 downloaded_models/*
+__pycache__/*
