@@ -60,7 +60,9 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
     return train_loss, val_loss
 
 
-def plot_values(epochs_seen, examples_seen, train_values, val_values, label="loss"):
+def plot_values(
+    epochs_seen, examples_seen, train_values, val_values, label="loss", plot=False
+):
     fig, ax1 = plt.subplots(figsize=(5, 3))
 
     # Plot training and validation loss against epochs
@@ -77,7 +79,29 @@ def plot_values(epochs_seen, examples_seen, train_values, val_values, label="los
 
     fig.tight_layout()  # Adjust layout to make room
     plt.savefig(f"{label}-plot.pdf")
-    plt.show()
+    if plot:
+        plt.show()
+
+
+def classify_review(
+    text, model, tokenizer, device, max_length=None, pad_token_id=50256
+):
+    model.to(device)
+    model.eval()
+    input_ids = tokenizer.encode(text)
+    supported_context_length = model.position_embeddings.weight.shape[0]
+
+    input_ids = input_ids[: min(max_length, supported_context_length)]
+    # padding the sequence
+    input_ids += [pad_token_id] * (max_length - len(input_ids))
+    input_tensor = torch.tensor(input_ids, device=device).unsqueeze(0)
+
+    with torch.no_grad():
+        output = model(input_tensor)
+        logits = output[:, -1, :]  # getting last two logits
+
+    logit_probs = torch.softmax(logits, dim=-1)
+    return logit_probs
 
 
 def train_classifier(
@@ -87,6 +111,7 @@ def train_classifier(
     train_losses, val_losses, train_acc, val_acc = [], [], [], []
     examples_seen, global_step = 0, -1
 
+    old_acc = 0
     for epoch in range(num_epochs):
         model.train()
 
@@ -121,9 +146,15 @@ def train_classifier(
 
         # Accuracy after Each epoch
         train_accuracy = loader_accuracy(train_loader, model, device, eval_iter)
+        if train_accuracy > old_acc:
+            torch.save(
+                model.state_dict(), f"spam_review_{train_accuracy * 100:.2f}_weight.pth"
+            )
         val_accuracy = loader_accuracy(val_loader, model, device, eval_iter)
         print(f"Train Accuracy:{train_accuracy * 100:.2f}%")
         print(f"Val Accuracy:{val_accuracy * 100:.2f}%")
         train_acc.append(train_accuracy)
         val_acc.append(val_accuracy)
+        old_acc = train_accuracy
+    torch.save(model.state_dict(), "training_end_weight.pth")
     return train_losses, val_losses, train_acc, val_acc, examples_seen
