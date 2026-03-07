@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 
 
 def loader_accuracy(data_loader, model, device, num_batches=None):
@@ -48,3 +49,80 @@ def loader_loss(data_loader, model, device, num_batches=None):
         else:
             break
     return total_loss / num_batches
+
+
+def evaluate_model(model, train_loader, val_loader, device, eval_iter):
+    model.eval()
+    with torch.no_grad():
+        train_loss = loader_loss(train_loader, model, device, num_batches=eval_iter)
+        val_loss = loader_loss(val_loader, model, device, num_batches=eval_iter)
+    model.train()
+    return train_loss, val_loss
+
+
+def plot_values(epochs_seen, examples_seen, train_values, val_values, label="loss"):
+    fig, ax1 = plt.subplots(figsize=(5, 3))
+
+    # Plot training and validation loss against epochs
+    ax1.plot(epochs_seen, train_values, label=f"Training {label}")
+    ax1.plot(epochs_seen, val_values, linestyle="-.", label=f"Validation {label}")
+    ax1.set_xlabel("Epochs")
+    ax1.set_ylabel(label.capitalize())
+    ax1.legend()
+
+    # Create a second x-axis for examples seen
+    ax2 = ax1.twiny()  # Create a second x-axis that shares the same y-axis
+    ax2.plot(examples_seen, train_values, alpha=0)  # Invisible plot for aligning ticks
+    ax2.set_xlabel("Examples seen")
+
+    fig.tight_layout()  # Adjust layout to make room
+    plt.savefig(f"{label}-plot.pdf")
+    plt.show()
+
+
+def train_classifier(
+    model, train_loader, val_loader, optimizer, device, num_epochs, eval_freq, eval_iter
+):
+    train_losses, val_losses, train_acc, val_acc = [], [], [], []
+    examples_seen, global_step = 0, -1
+
+    for epoch in range(num_epochs):
+        model.train()
+
+        for input_batch, target_batch in train_loader:
+            # Reset loss from previous grads
+            optimizer.zero_grad()
+            loss = batch_loss(
+                input_batch=input_batch,
+                target_batch=target_batch,
+                model=model,
+                device=device,
+            )
+            loss.backward()
+            optimizer.step()
+            examples_seen += input_batch.shape[0]
+            global_step += 1
+
+            # Evaluation Frequency
+            if global_step % eval_freq == 0:
+                train_loss, val_loss = evaluate_model(
+                    model=model,
+                    train_loader=train_loader,
+                    val_loader=val_loader,
+                    device=device,
+                    eval_iter=eval_iter,
+                )
+                train_losses.append(train_loss)
+                val_losses.append(val_loss)
+                print(
+                    f"EP:{epoch + 1},(Global_step:{global_step:.06d}),\n Train_loss:{train_loss:.3f},Val_loss:{val_loss:.3f}"
+                )
+
+        # Accuracy after Each epoch
+        train_accuracy = loader_accuracy(train_loader, model, device, eval_iter)
+        val_accuracy = loader_accuracy(val_loader, model, device, eval_iter)
+        print(f"Train Accuracy:{train_accuracy * 100:.2f}%")
+        print(f"Val Accuracy:{val_accuracy * 100:.2f}%")
+        train_acc.append(train_accuracy)
+        val_acc.append(val_accuracy)
+    return train_losses, val_losses, train_acc, val_acc, examples_seen
