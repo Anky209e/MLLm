@@ -25,7 +25,7 @@ if __name__ == "__main__":
         max_length=train_dataset.max_length,
         tokenizer=tokenizer,
     )
-
+    print(train_dataset.max_length)
     num_workers = 0
     batch_size = 8
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     start_time = time.time()
     optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5, weight_decay=0.1)
 
-    NUM_EPOCHS = 1
+    NUM_EPOCHS = 5
     train_losses, val_losses, train_acc, val_acc, examples_seen = train_classifier(
         model=model,
         train_loader=train_loader,
