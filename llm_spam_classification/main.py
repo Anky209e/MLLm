@@ -1,13 +1,13 @@
-import tiktoken
-
 import time
+
+import tiktoken
 import torch
 from dataset import SpamDataset
 from download_gpt import download_and_load_gpt2
 from finetune import load_weights_into_gpt
 from gpt import GPTModel
 from torch.utils.data import DataLoader
-from utils import train_classifier, plot_values
+from utils import plot_values, train_classifier
 
 if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")

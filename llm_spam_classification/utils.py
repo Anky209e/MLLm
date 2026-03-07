@@ -1,5 +1,5 @@
-import torch
 import matplotlib.pyplot as plt
+import torch
 
 
 def loader_accuracy(data_loader, model, device, num_batches=None):

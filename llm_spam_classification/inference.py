@@ -1,7 +1,7 @@
-from utils import classify_review
-from gpt import GPTModel
-import torch
 import tiktoken
+import torch
+from gpt import GPTModel
+from utils import classify_review
 
 if __name__ == "__main__":
     BASE_CONFIG = {
