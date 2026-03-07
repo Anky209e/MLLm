@@ -83,6 +83,7 @@ def plot_values(epochs_seen, examples_seen, train_values, val_values, label="los
 def train_classifier(
     model, train_loader, val_loader, optimizer, device, num_epochs, eval_freq, eval_iter
 ):
+    model.to(device)
     train_losses, val_losses, train_acc, val_acc = [], [], [], []
     examples_seen, global_step = 0, -1
 
@@ -115,7 +116,7 @@ def train_classifier(
                 train_losses.append(train_loss)
                 val_losses.append(val_loss)
                 print(
-                    f"EP:{epoch + 1},(Global_step:{global_step:.06d}),\n Train_loss:{train_loss:.3f},Val_loss:{val_loss:.3f}"
+                    f"EP:{epoch + 1},(Global_step:{global_step}),\n Train_loss:{train_loss:.3f},Val_loss:{val_loss:.3f}"
                 )
 
         # Accuracy after Each epoch
