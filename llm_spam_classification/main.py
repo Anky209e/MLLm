@@ -1,12 +1,13 @@
+import tiktoken
+
+import time
 import torch
 from dataset import SpamDataset
-import pandas as pd
-import tiktoken
-from torch.utils.data import DataLoader
 from download_gpt import download_and_load_gpt2
 from finetune import load_weights_into_gpt
 from gpt import GPTModel
-
+from torch.utils.data import DataLoader
+from utils import train_classifier, plot_values
 
 if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")
@@ -66,7 +67,6 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     settings, params = download_and_load_gpt2("124M", "downloaded_models")
     print(settings)
-    print(params.keys())
 
     model_configs = {
         "gpt2-small (124M)": {"emb_dim": 768, "n_layers": 12, "n_heads": 12},
@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     model = GPTModel(cfg=BASE_CONFIG)
     load_weights_into_gpt(model, params)
-    print("weights Loaded")
+    print("---weights Loaded---")
     model.eval()
     # Freezing model
     for param in model.parameters():
@@ -100,6 +100,28 @@ if __name__ == "__main__":
     )
     # Making last transformer layer and Normalization layer trainable
     for param in model.transformer_blocks[-1].parameters():
-        param.requires_grad = False
+        param.requires_grad = True
     for param in model.layer_norm.parameters():
-        param.requires_grad = False
+        param.requires_grad = True
+
+    start_time = time.time()
+    optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5, weight_decay=0.1)
+
+    NUM_EPOCHS = 1
+    train_losses, val_losses, train_acc, val_acc, examples_seen = train_classifier(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        device=device,
+        num_epochs=NUM_EPOCHS,
+        eval_freq=50,
+        eval_iter=1,
+    )
+    end = time.time()
+    exec_time = (end - start_time) / 60
+    print(f"Training Completed in {exec_time:.2f} minutes")
+    epochs_tensor = torch.linspace(0, NUM_EPOCHS, len(train_losses))
+    examples_seen_tensor = torch.linspace(0, examples_seen, len(train_losses))
+
+    plot_values(epochs_tensor, examples_seen_tensor, train_losses, val_losses)
