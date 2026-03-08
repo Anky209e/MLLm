@@ -1,5 +1,3 @@
-# TODO: add finetune functions
-
 import numpy as np
 import tiktoken
 import torch
