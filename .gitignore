@@ -1,4 +1,5 @@
 build_llm_from_scratch/__pycache__
 build_llm_from_scratch/Gutenberg_Top_100/
 instruction_finetuning/__pycache__
+instruction_finetuning/downloaded_models
 *.pth
