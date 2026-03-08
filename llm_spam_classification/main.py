@@ -65,8 +65,6 @@ if __name__ == "__main__":
     INPUT_PROMPT = "Every effort moves"
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    settings, params = download_and_load_gpt2("124M", "downloaded_models")
-    print(settings)
 
     model_configs = {
         "gpt2-small (124M)": {"emb_dim": 768, "n_layers": 12, "n_heads": 12},
