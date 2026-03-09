@@ -1,9 +1,8 @@
 import logging
+
 import matplotlib.pyplot as plt
 import torch
 from tqdm import tqdm
-
-import matplotlib.pyplot as plt
 
 
 def loader_accuracy(data_loader, model, device, num_batches=None):

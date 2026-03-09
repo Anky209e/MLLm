@@ -8,7 +8,14 @@ from download_instruction_dataset import download_and_load_file
 from finetune import load_weights_into_gpt
 from gpt import GPTModel
 from torch.utils.data import DataLoader
-from utils import collate
+from utils import (
+    collate,
+    format_to_alpaca,
+    generate,
+    text_to_token_ids,
+    token_ids_to_text,
+    train_model_simple,
+)
 
 if __name__ == "__main__":
     tokenizer = tiktoken.get_encoding("gpt2")
@@ -95,3 +102,17 @@ if __name__ == "__main__":
     load_weights_into_gpt(model, params)
     model.eval()
     print("---Loaded Weights---")
+
+    model.to(device)
+    input_text = format_to_alpaca(val_data[3])
+    print(input_text)
+    token_ids = generate(
+        model=model,
+        idx=text_to_token_ids(input_text, tokenizer, device=device),
+        max_new_tokens=35,
+        context_size=BASE_CONFIG["context_length"],
+        eos_id=50256,
+    )
+    generated_text = token_ids_to_text(token_ids, tokenizer)
+    response_text = generated_text[len(input_text) :].strip()
+    print(response_text)
