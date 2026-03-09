@@ -331,6 +331,7 @@ def train_model_simple(
             writer.add_scalar("Validation_loss", val_loss, epoch)
             writer.add_scalar("Perplexity", round(train_perplexity.item()), epoch)
 
+        torch.save(model.state_dict(), f"Weigths_{epoch + 1}.pth")
         generate_and_print_sample(
             model=model,
             tokenizer=tokenizer,
