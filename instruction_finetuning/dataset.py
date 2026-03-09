@@ -13,7 +13,9 @@ class InstructionDataset(Dataset):
             alpaca_instruction = format_to_alpaca(entry)
             response_text = f"\n\n### Response:\n{entry['output']}"
             full_text = alpaca_instruction + response_text
-            self.encoded_texts.append(tokenizer.encode(full_text))
+            self.encoded_texts.append(
+                tokenizer.encode(full_text, allowed_special={"<|endoftext|>"})
+            )
 
     def __getitem__(self, index):
         return self.encoded_texts[index]
