@@ -107,6 +107,7 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.00005, weight_decay=0.1)
     NUM_EPOCHS = 15
+    # TODO: Add graphs
 
     train_losses, val_losses, tokens_seen = train_model_simple(
         model=model,
