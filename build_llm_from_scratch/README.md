@@ -1,70 +1,120 @@
-# Basic concepts for creating LLM's from Scratch.
+# 🧠 Building LLMs from Scratch: A Deep Dive
 
-- Learning about Tokenization 
-  - Word based
-  - Byte-pair encoding
+This repository contains a step-by-step implementation of a GPT-style Large Language Model (LLM). These notes serve as a guide to understanding the architecture from the basic attention mechanism to the full Transformer block.
 
-- Learning about Embeddings
-  - A multi-dimensional vector space representing tokens
-  - Tokens with similar context are closer
-  - Catches and preserves the context
-  - positional_embeddings preservers context w.r.t Position of token in Input
+---
 
-## Attention Mechanisms
+## 🗺️ Roadmap & Architecture Overview
 
-- Simple Attention
-  - Suppose we have a input = ["Hi","I","Am","Good"]
-  - For each token or we call Query we will have a embedding of dim (n)
-  - For calculating Attention we will have to calculate the dot product between query and each input token.
-  - Dot product quantifies how much aligned are two vectors in the space.
-  - Dot product determines the extent to which elements of input attend to each other or values to each other.
-  - Higher the dot product -> Higher similarity and higher attention scores.
+The journey from raw text to a model that "understands" context follows this path:
+`Raw Text` → `Tokens` → `Embeddings` → `Transformer Blocks` → `Logits` → `Probabilities`.
 
-- Self Attention
-  - For self attention we want trainable weights that we can update and improve attention.
-  - We have Three different weight matrix
-    - W_q = Query
-    - W_k = Key
-    - W_v = Value
-  - Input Dimension of these matrices need to be same as Embedding Dimension of out Input vectors.
-  - Now for calculating:
-    - Keys = Input . W_k
-    - Queries = Input . W_q
-    - Values = Input . W_v
-  - Now we need to calculate Attention score:
-    - attention_score = Queries . Transpose(Keys)
-  - For calculating Attention weights We will have to scale these values and use softmax.
-  - Before using Softmax We will scale then by root(key.shape[-1]) .
-  - Dividing the attention Scores by root of embedding Dimension before putting them in softmax helps with:
-    - Reduces the peaks of softmax and model won't be very overconfident:
-    - Reduces Variance if we divide by the root of Dimension.
-  - Finally we will calculate context vectors which is dot product of Attention_weights and Values
+### 1. Tokenization & Input Preparation
+Before the model can process text, it must be converted into numbers.
+- **Byte-Pair Encoding (BPE):** A subword tokenization method that balances vocabulary size and sequence length.
+- **Files:** `byte_pair_tik_token.py`, `input_target_pair.py`
 
-- Causal Attention
-  - For Causal Attention we Mask the Values which we do not need or deemed to be not required.
-  - We create a mask and replace values above diagonal with -inf.
-  - Why -inf ?
-    - We want to make sure that during softmax the other values are not effected by removed or extra values.
-    - Prevents Data leakage
+### 2. The Embedding Layer
+We represent tokens in a continuous multi-dimensional space.
+- **Token Embeddings:** Mapping each token ID to a vector of size `d_model`.
+- **Positional Embeddings:** Since Transformers process all tokens in parallel, we must "inject" order information. We add a unique vector to each token based on its position.
+- **Formula:** $X_{final} = X_{token} + X_{position}$
+- **Files:** `embedding_lookup.py`, `positional_embeddings.py`, `gpt.py`
 
-- Multi-Head Attention
-  - We have multiple 2heads (n) of Causal Attention.
-  - We will have (n) no of Q,K,V and we will process them parallel.
-  - In the end we will have n no. of context vectors which we will concatenate and that will be our final context vector for input.
+---
 
-- Layer Normalisation
-  - While Doing backprop on out network The gradients and become too small or large.
-  - Its called as vanishing and exploding gradients which can result in unstable training dynamics.
-  - Layer Normalisation prevents this.
-  - As training Proceeds Input to each layer can change i.e internal covariate shift.
-  - This delays convergence and layer Normalisation prevents this.
+## ⚡ The Attention Mechanism: The "Brain" of the LLM
 
-- GELU
-  - Gaussian Error linear Unit
-  - Instead of ReLU we use GELU in transoformers as it retains some values that are negative.
-  - GELU is also used in GPT models.
+Attention allows the model to focus on relevant parts of the input sequence when processing a specific token.
 
-- Transformer Block
-  - ![Transformer Image](https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1-768x1082.png)
+### A. Simple Attention (The Intuition)
+The core idea is **Similarity**. We calculate how much one token "attends" to another using the Dot Product.
+- **Higher Dot Product** = Higher Similarity = More Attention.
+- **File:** `simple_attention.py`
+
+### B. Self-Attention ($Q, K, V$)
+We introduce trainable weights to allow the model to learn *what* to look for.
+1. **Query ($Q$):** "What am I looking for?"
+2. **Key ($K$):** "What information do I contain?"
+3. **Value ($V$):** "What information should I pass along?"
+
+**The Math:**
+$$Attention(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+- **Scaling by $\sqrt{d_k}$:** Prevents the dot product from growing too large, which would push the softmax into regions with tiny gradients (vanishing gradient problem).
+- **File:** `self_attention.py`
+
+### C. Causal Attention (The "Look-Ahead" Mask)
+In GPT (Generative Pre-trained Transformer), a token should only see its predecessors, not the future.
+- **Implementation:** We apply a **Mask** to the attention scores.
+- **Why $-\infty$?** When we apply `softmax`, $e^{-\infty} = 0$, effectively "turning off" the future tokens.
+- **File:** `causal_attention.py`
+
+### D. Multi-Head Attention (MHA)
+Instead of one "viewpoint," we use multiple "heads" to attend to different types of information simultaneously (e.g., one head for grammar, one for factual relationships).
+- **Process:** Split $d_{out}$ into $h$ heads → Process in parallel → Concatenate → Project back.
+- **File:** `multi_head_attention.py`
+
+---
+
+## 🧱 The Transformer Block
+The Transformer block combines MHA with other essential components to ensure stable training.
+
+```text
+Input ──► LayerNorm ──► Multi-Head Attention ──► Dropout ──► (+) ──┐
+  │                                                          ▲     │ (Residual Connection)
+  └──────────────────────────────────────────────────────────┘     │
+                                                                   │
+┌──────────────────────────────────────────────────────────────────┘
+│
+└───► LayerNorm ──► Feed Forward (GELU) ──► Dropout ──► (+) ──► Output
+  │                                                      ▲      (Residual Connection)
+  └──────────────────────────────────────────────────────┘
+```
+
+### Key Components:
+- **Layer Normalization:** Normalizes the inputs to a layer to have mean 0 and variance 1. This stabilizes training and prevents "Internal Covariate Shift." (`layer_normalisation.py`)
+- **GELU (Gaussian Error Linear Unit):** A smoother version of ReLU that allows small negative values, helping gradients flow better. (`gelu.py`)
+- **Residual (Skip) Connections:** Adding the input of a block to its output ($x + f(x)$). This allows gradients to flow through the network without disappearing in deep architectures.
+- **Feed Forward Network (FFN):** Two linear layers with a GELU activation in between, expanding the dimension usually by 4x. (`feed_forward_network.py`)
+- **File:** `transformer.py`
+
+---
+
+## 🏗️ The Full GPT Model
+Assembling everything into the final architecture.
+1. **Embedding Layer** (Token + Positional)
+2. **Stack of N Transformer Blocks**
+3. **Final Layer Norm**
+4. **Output Linear Layer:** Projects the $d_{model}$ back to $V$ (vocab size) to get "Logits."
+- **File:** `gpt.py`
+
+---
+
+## 🚀 Training & Inference
+
+### Training Logic
+- **Objective:** Predict the next token.
+- **Loss Function:** Cross-Entropy Loss between predicted logits and target token IDs.
+- **Files:** `main.py`, `finetune.py`, `loss-plot.pdf`
+
+### Inference Logic
+1. Start with a prompt.
+2. Get the model's prediction for the last token.
+3. Append the predicted token to the input.
+4. Repeat until a limit is reached or an `<endoftext>` token is generated.
+- **File:** `inference.py`
+
+---
+
+## 📊 Summary Cheat Sheet
+
+| Component | Purpose | Key File |
+| :--- | :--- | :--- |
+| **BPE** | Efficient Tokenization | `byte_pair_tik_token.py` |
+| **Scaling** ($\sqrt{d_k}$) | Gradient Stability | `self_attention.py` |
+| **Masking** | Prevents Data Leakage | `causal_attention.py` |
+| **Multi-Head** | Parallel Perspectives | `multi_head_attention.py` |
+| **Residuals** | Trains Deep Networks | `transformer.py` |
+| **Logits** | Raw prediction scores | `gpt.py` |
 
 ```
