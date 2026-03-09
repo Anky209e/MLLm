@@ -104,15 +104,40 @@ if __name__ == "__main__":
     print("---Loaded Weights---")
 
     model.to(device)
-    input_text = format_to_alpaca(val_data[3])
-    print(input_text)
-    token_ids = generate(
+
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.00005, weight_decay=0.1)
+    NUM_EPOCHS = 15
+
+    train_losses, val_losses, tokens_seen = train_model_simple(
         model=model,
-        idx=text_to_token_ids(input_text, tokenizer, device=device),
-        max_new_tokens=35,
-        context_size=BASE_CONFIG["context_length"],
-        eos_id=50256,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        num_epochs=NUM_EPOCHS,
+        eval_freq=5,
+        eval_iter=5,
+        start_context=format_to_alpaca(val_data[5]),
+        tokenizer=tokenizer,
+        device=device,
+        cfg=BASE_CONFIG,
     )
-    generated_text = token_ids_to_text(token_ids, tokenizer)
-    response_text = generated_text[len(input_text) :].strip()
-    print(response_text)
+
+    for entry in test_data[:10]:
+        input_text = format_to_alpaca(entry)
+
+        token_ids = generate(
+            model=model,
+            idx=text_to_token_ids(input_text, tokenizer, device=device),
+            max_new_tokens=256,
+            context_size=BASE_CONFIG["context_length"],
+            eos_id=50256,
+        )
+        generated_text = token_ids_to_text(token_ids, tokenizer)
+        response_text = (
+            generated_text[len(input_text) :].replace("### Response:", "").strip()
+        )
+
+        print(input_text)
+        print(f"\nCorrect response:\n>> {entry['output']}")
+        print(f"\nModel response:\n>> {response_text.strip()}")
+        print("-------------------------------------")
