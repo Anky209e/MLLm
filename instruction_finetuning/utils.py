@@ -151,13 +151,21 @@ def evaluate_model(model, train_loader, val_loader, device, eval_iter):
 def generate_and_print_sample(model, tokenizer, device, start_context, set_train=True):
     model.eval()
     context_size = model.position_embeddings.weight.shape[0]
-    encoded = text_to_token_ids(start_context, tokenizer, device=device)
+    input_text = start_context
     with torch.no_grad():
-        token_ids = generate_text_simple(
-            model=model, idx=encoded, max_new_tokens=50, context_size=context_size
+        token_ids = generate(
+            model=model,
+            idx=text_to_token_ids(input_text, tokenizer, device=device),
+            max_new_tokens=35,
+            context_size=context_size,
+            eos_id=50256,
         )
     decoded_text = token_ids_to_text(token_ids, tokenizer)
-    print(decoded_text.replace("\n", " "))  # Compact print format
+    response_text = decoded_text[len(input_text) :].strip()
+    print("-------Input-------\n")
+    print(input_text)
+    print("-------Response-------\n")
+    print(response_text)
     if set_train:
         model.train()
 
@@ -323,18 +331,12 @@ def train_model_simple(
             writer.add_scalar("Validation_loss", val_loss, epoch)
             writer.add_scalar("Perplexity", round(train_perplexity.item()), epoch)
 
-        token_ids = generate(
+        generate_and_print_sample(
             model=model,
-            idx=text_to_token_ids(start_context, tokenizer, device),
-            max_new_tokens=25,
-            context_size=cfg["context_length"],
-            top_k=50,
-            temperature=1,
+            tokenizer=tokenizer,
+            device=device,
+            start_context=start_context,
+            set_train=True,
         )
-
-        torch.save(model.state_dict(), f"weights_{epoch + 1}.pth")
-        generated_text = token_ids_to_text(token_ids, tokenizer)
-
-        print(generated_text)
     torch.save(model.state_dict(), "weights_checkpoint.pth")
     return train_losses, val_losses, track_tokens_seen
