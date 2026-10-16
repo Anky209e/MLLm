@@ -1,5 +1,24 @@
 # 🧠 Building LLMs from Scratch: A Deep Dive
 
+<!--toc:start-->
+- [🧠 Building LLMs from Scratch: A Deep Dive](#🧠-building-llms-from-scratch-a-deep-dive)
+  - [🗺️ Roadmap & Architecture Overview](#🗺️-roadmap-architecture-overview)
+    - [1. Tokenization & Input Preparation](#1-tokenization-input-preparation)
+    - [2. The Embedding Layer](#2-the-embedding-layer)
+  - [⚡ The Attention Mechanism: The "Brain" of the LLM](#the-attention-mechanism-the-brain-of-the-llm)
+    - [A. Simple Attention (The Intuition)](#a-simple-attention-the-intuition)
+    - [B. Self-Attention ($Q, K, V$)](#b-self-attention-q-k-v)
+    - [C. Causal Attention (The "Look-Ahead" Mask)](#c-causal-attention-the-look-ahead-mask)
+    - [D. Multi-Head Attention (MHA)](#d-multi-head-attention-mha)
+  - [🧱 The Transformer Block](#🧱-the-transformer-block)
+    - [Key Components:](#key-components)
+  - [🏗️ The Full GPT Model](#🏗️-the-full-gpt-model)
+  - [🚀 Training & Inference](#🚀-training-inference)
+    - [Training Logic](#training-logic)
+    - [Inference Logic](#inference-logic)
+  - [📊 Summary Cheat Sheet](#📊-summary-cheat-sheet)
+<!--toc:end-->
+
 This repository contains a step-by-step implementation of a GPT-style Large Language Model (LLM). These notes serve as a guide to understanding the architecture from the basic attention mechanism to the full Transformer block.
 
 ---
